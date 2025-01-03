@@ -1,0 +1,84 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  background-image: url('https://firmajans.com.tr/wp-content/uploads/2018/12/hastane-web-sitesi-tasarimi-1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: #f8f9fa; /* Fallback color */
+}
+
+/* Style the navbar */
+.navbar {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+}
+
+/* Style the footer */
+.footer {
+  background-color: rgba(255, 255, 255, 0.97);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}
+
+/* Remove background from login/register container */
+.container {
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  background-color: transparent;
+}
+
+/* Style form elements for better visibility */
+.form-control {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* Style form labels for better visibility */
+label {
+  color: #000;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Style the register/login card */
+.card {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+/* Style the register/login buttons */
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}

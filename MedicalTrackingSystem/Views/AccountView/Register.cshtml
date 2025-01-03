@@ -1,0 +1,169 @@
+@{
+    ViewData["Title"] = "Register";
+    Layout = "_Layout";
+}
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Register</h3>
+                    <form id="registerForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tcIdentityNumber" class="form-label">TC Identity Number</label>
+                                <input type="text" class="form-control" id="tcIdentityNumber" name="tcIdentityNumber" required maxlength="11">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userType" class="form-label">Register As</label>
+                            <select class="form-select" id="userType" name="userType" required>
+                                <option value="">Select user type</option>
+                                <option value="Patient">Patient</option>
+                                <option value="Doctor">Doctor</option>
+                            </select>
+                        </div>
+                        <div id="doctorFields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="clinicId" class="form-label">Clinic</label>
+                                <select class="form-select" id="clinicId" name="clinicId">
+                                    <option value="">Choose a clinic...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <p>Already have an account? <a href="@Url.Action("Login", "AccountView")">Login here</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Load clinics for doctor registration
+            $.get('/api/Clinics', function (clinics) {
+                clinics.forEach(function (clinic) {
+                    $('#clinicId').append($('<option>', {
+                        value: clinic.clinicId,
+                        text: clinic.name
+                    }));
+                });
+            });
+
+            // Show/hide doctor fields based on user type selection
+            $('#userType').change(function () {
+                if ($(this).val() === 'Doctor') {
+                    $('#doctorFields').show();
+                } else {
+                    $('#doctorFields').hide();
+                    // Clear doctor fields when switching to patient
+                    $('#clinicId').val('');
+                }
+            });
+
+            // Handle form submission
+            $('#registerForm').on('submit', function (e) {
+                e.preventDefault();
+
+                // Basic validation
+                if ($(this).get(0).checkValidity() === false) {
+                    e.stopPropagation();
+                    $(this).addClass('was-validated');
+                    return;
+                }
+
+                // Get the user type
+                var userType = $('#userType').val();
+
+                // Create the base registration data
+                var registerData = {
+                    firstName: $('#firstName').val(),
+                    lastName: $('#lastName').val(),
+                    username: $('#username').val(),
+                    password: $('#password').val(),
+                    email: $('#email').val(),
+                    tcIdentityNumber: $('#tcIdentityNumber').val(),
+                    userType: userType
+                };
+
+                // If registering as a doctor, add clinic ID
+                if (userType === 'Doctor') {
+                    var clinicId = $('#clinicId').val();
+                    if (!clinicId) {
+                        alert('Please select a clinic');
+                        return;
+                    }
+                    registerData.clinicId = parseInt(clinicId);
+                }
+
+                // Send registration request
+                $.ajax({
+                    url: '/api/Account/register',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(registerData),
+                    success: function () {
+                        alert('Registration successful! Please login.');
+                        window.location.href = '/AccountView/Login';
+                    },
+                    error: function (xhr) {
+                        console.log('Error Response:', xhr.responseText);
+                        var errorMessage = 'Registration failed. Please try again.';
+                        if (xhr.responseText) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                if (response.errors) {
+                                    errorMessage = Object.values(response.errors).flat().join('\n');
+                                } else if (response.message) {
+                                    errorMessage = response.message;
+                                } else if (typeof response === 'string') {
+                                    errorMessage = response;
+                                }
+                            } catch (e) {
+                                errorMessage = xhr.responseText;
+                            }
+                        }
+                        alert(errorMessage);
+                        console.log('Full Error Details:', {
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+} 

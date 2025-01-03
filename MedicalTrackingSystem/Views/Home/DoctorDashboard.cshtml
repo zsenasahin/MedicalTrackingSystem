@@ -1,0 +1,107 @@
+@{
+    ViewData["Title"] = "Doctor Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Doctor Information</h5>
+                    <div id="profileInfo">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">My Appointments</h5>
+                    <div class="d-flex justify-content-between mb-3">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#today">Today</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#upcoming">Upcoming</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#past">Past</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div id="today" class="tab-pane fade show active">
+                            <div id="todayAppointments">
+                                Loading...
+                            </div>
+                        </div>
+                        <div id="upcoming" class="tab-pane fade">
+                            <div id="upcomingAppointments">
+                                Loading...
+                            </div>
+                        </div>
+                        <div id="past" class="tab-pane fade">
+                            <div id="pastAppointments">
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Load profile information
+            $.get('/api/Users/profile', function (profile) {
+                var html = `
+                    <p><strong>Name:</strong> ${profile.firstName} ${profile.lastName}</p>
+                    <p><strong>Email:</strong> ${profile.email}</p>
+                    <p><strong>Clinic:</strong> ${profile.clinic.name}</p>
+                    <p><strong>Location:</strong> ${profile.clinic.location}</p>
+                `;
+                
+                $('#profileInfo').html(html);
+            });
+
+            // Load appointments
+            $.get('/api/Appointments', function (appointments) {
+                var now = new Date();
+                var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                var tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+
+                var todayAppts = appointments.filter(a => {
+                    var apptDate = new Date(a.appointmentDate);
+                    return apptDate >= today && apptDate < tomorrow;
+                });
+                var upcoming = appointments.filter(a => new Date(a.appointmentDate) >= tomorrow);
+                var past = appointments.filter(a => new Date(a.appointmentDate) < today);
+
+                function createAppointmentHtml(appointments) {
+                    return appointments.map(appointment => `
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6 class="card-title">Date: ${new Date(appointment.appointmentDate).toLocaleString()}</h6>
+                                <p class="card-text">
+                                    Patient: ${appointment.patient.firstName} ${appointment.patient.lastName}<br>
+                                    Status: ${appointment.status}
+                                </p>
+                            </div>
+                        </div>
+                    `).join('') || 'No appointments';
+                }
+
+                $('#todayAppointments').html(createAppointmentHtml(todayAppts));
+                $('#upcomingAppointments').html(createAppointmentHtml(upcoming));
+                $('#pastAppointments').html(createAppointmentHtml(past));
+            });
+        });
+    </script>
+} 

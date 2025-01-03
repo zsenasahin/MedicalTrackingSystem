@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Login</h3>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="userType" class="form-label">Login As</label>
+                            <select class="form-select" id="userType" name="userType" required>
+                                <option value="">Select user type</option>
+                                <option value="Patient">Patient</option>
+                                <option value="Doctor">Doctor</option>
+                            </select>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <p>Don't have an account? <a href="@Url.Action("Register", "AccountView")">Register here</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#loginForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var loginData = {
+                    username: $('#username').val(),
+                    password: $('#password').val(),
+                    userType: $('#userType').val()
+                };
+
+                $.ajax({
+                    url: '/api/Account/login',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(loginData),
+                    success: function (response) {
+                        window.location.href = '/Home/Index';
+                    },
+                    error: function (xhr) {
+                        var errorMessage = 'Login failed. Please try again.';
+                        if (xhr.responseText) {
+                            try {
+                                var response = JSON.parse(xhr.responseText);
+                                errorMessage = response;
+                            } catch (e) {
+                                errorMessage = xhr.responseText;
+                            }
+                        }
+                        alert(errorMessage);
+                    }
+                });
+            });
+        });
+    </script>
+} 
